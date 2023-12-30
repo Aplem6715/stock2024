@@ -46,13 +46,13 @@ for dir in os.listdir('./Data/Split/'):
         df_all = pd.concat([df_all, df])
         del df
 
-    make_bar(dir, df_all, bar_thresh)
+    bar = make_bar(dir, df_all, bar_thresh)
     # indexを1分ずつ増加するdatetime形式に変更
-    df_all.index = pd.date_range(
-        start='2000-01-01 00:00:00', periods=df_all.shape[0], freq='T')
+    bar.index = pd.date_range(
+        start='2000-01-01 00:00:00', periods=bar.shape[0], freq='T')
 
     # 出力
-    df_all.to_parquet(out_dir + dir + '.parquet')
+    bar.to_parquet(out_dir + dir + '.parquet')
     
-    del df_all
+    del df_all, bar
     gc.collect()
