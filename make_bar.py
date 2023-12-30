@@ -52,7 +52,7 @@ for dir in os.listdir('./Data/Split/'):
         start='2000-01-01 00:00:00', periods=bar.shape[0], freq='T')
 
     # 出力
-    bar.to_parquet(out_dir + dir + '.parquet')
+    bar.to_csv(out_dir + dir + '.csv')
     
     del df_all, bar
     gc.collect()
