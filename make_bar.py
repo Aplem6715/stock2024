@@ -13,6 +13,9 @@ def make_bar(code: int, df: pd.DataFrame, vol_thresh: int):
     df['datetime'] = pd.to_datetime(df['date'].astype(
         str) + df['time'].astype(str), format='%Y%m%d%H%M%S%f')
 
+    # datetime列をインデックスに設定
+    df = df.sort_values('datetime')
+
     df['cumsum'] = df['Volume'].cumsum()
     df['cumsum'] = df['cumsum'] // vol_thresh
     # price列からohlc列を作成
