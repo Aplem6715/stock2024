@@ -1,10 +1,11 @@
 import gc
+import shutil
 import pandas as pd
 import pickle
 import os
 
 out_dir = './Data/Bar/'
-bar_thresh = 10000
+bar_thresh = 30000
 
 
 # 'trading volume'列を累積していき，vol_threshを超えたら足を作成する
@@ -35,6 +36,9 @@ def make_bar(code: int, df: pd.DataFrame, vol_thresh: int):
     print(f'{code}: Time  mean: {mean/60:4.1f}[min], var: {var/60:4.1f}[min]')
     return df
 
+
+shutil.rmtree(out_dir, ignore_errors=True)
+os.makedirs(out_dir, exist_ok=True)
 
 # Data/Split/ディレクトリ内の全ディレクトリをループ
 for dir in os.listdir('./Data/Split/'):

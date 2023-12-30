@@ -28,11 +28,12 @@ def conv_chart(df: pd.DataFrame, bar_freq: str) -> pd.DataFrame:
                                            'Volume': 'sum'})
     return ret
 
-def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str]):
+def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str], check_empty: bool = True) -> pd.DataFrame:
     is_first_freq = True
     for freq in freqs:
         df = conv_chart(origin, freq)
-        df = df.loc[(df['Open'] != df['High']) | (df['Open'] != df['Low']) | (df['Open'] != df['Close'])]
+        if check_empty:
+            df = df.loc[(df['Open'] != df['High']) | (df['Open'] != df['Low']) | (df['Open'] != df['Close'])]
         add_indicators(df)
         if is_first_freq:
             ret = df
@@ -80,16 +81,14 @@ def add_indicators(df: pd.DataFrame):
     # 単純移動平均 (SMA) インジケーターを追加
     sma5 = SMAIndicator(close=c, window=5).sma_indicator()
     sma25 = SMAIndicator(close=c, window=25).sma_indicator()
-    sma50 = SMAIndicator(close=c, window=50).sma_indicator()
     df['SMA_S'] = sma25 - sma5
-    df['SMA_M'] = sma50 - sma25
+    df['SMA_C'] = c - sma25
 
     # 指数移動平均 (EMA) インジケーターを追加
     ema5 = EMAIndicator(close=c, window=5).ema_indicator()
     ema25 = EMAIndicator(close=c, window=25).ema_indicator()
-    ema50 = EMAIndicator(close=c, window=50).ema_indicator()
     df['EMA_S'] = ema25 - ema5
-    df['EMA_M'] = ema50 - ema25
+    df['EMA_C'] = c - ema25
 
     # MACD インジケーターを追加
     macd = MACD(close=c)
@@ -100,14 +99,14 @@ def add_indicators(df: pd.DataFrame):
     # On Balance Volume (OBV) インジケーターを追加
     obv = OnBalanceVolumeIndicator(close=c, volume=df['Volume']).on_balance_volume()
     obv_short = SMAIndicator(close=obv, window=5).sma_indicator()
-    obv_long = SMAIndicator(close=obv, window=50).sma_indicator()
+    obv_long = SMAIndicator(close=obv, window=25).sma_indicator()
     df['OBV'] = obv_long - obv_short
 
     # Accumulation/Distribution (Acc/Dist) インジケーターを追加
     adi = AccDistIndexIndicator(high=h, low=l, close=c, volume=df['Volume'])
     ad = adi.acc_dist_index()
     ad_short = SMAIndicator(close=ad, window=5).sma_indicator()
-    ad_long = SMAIndicator(close=ad, window=50).sma_indicator()
+    ad_long = SMAIndicator(close=ad, window=25).sma_indicator()
     df['ADI'] = ad_long - ad_short
 
     # 一目均衡表 インジケーターを追加
