@@ -22,6 +22,8 @@ for file in os.listdir(filtered_dir):
     for code in codes:
         dir = 'Data/Split/' + str(code)
         split_df = df[df['issue code'] == code]
+        # issue code列を削除
+        split_df = split_df.drop(columns='issue code')
 
         num_trade = split_df.shape[0]
         trade_per_day = num_trade / 20
