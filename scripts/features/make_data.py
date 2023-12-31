@@ -38,7 +38,7 @@ def make_zig_target(df: pd.DataFrame) -> pd.DataFrame:
     # h_pivots, l_pivotsはピボットのインデックス番号
     _, _, h_pivots, l_pivots = calc_zigzag(
         h, l, zz_period=zig_period, num_shifts=0)
-    res: np.ndarray = np.full_like(h, fill_value=0)
+    res: np.ndarray = np.full_like(h, fill_value=np.nan)
     res[h_pivots] = 1
     res[l_pivots] = -1
     df['zig_target'] = res

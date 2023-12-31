@@ -31,7 +31,7 @@ def conv_chart(df: pd.DataFrame, bar_freq: str) -> pd.DataFrame:
 def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str], check_empty: bool = True) -> pd.DataFrame:
     is_first_freq = True
     for freq in freqs:
-        df = conv_chart(origin, freq)
+        df = conv_chart(origin, freq) if freq != '1T' else origin.copy()
         if check_empty:
             df = df.loc[(df['Open'] != df['High']) | (df['Open'] != df['Low']) | (df['Open'] != df['Close'])]
         add_indicators(df)
