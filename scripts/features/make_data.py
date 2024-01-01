@@ -7,6 +7,7 @@ from utilc.zigzag import calc_zigzag
 
 time_frames = ['1T', '1H']
 zig_period = 10
+in_dir = './Data/Bar/'
 out_file = './Data/train.parquet'
 
 
@@ -71,9 +72,9 @@ def make_zig_target(df: pd.DataFrame) -> pd.DataFrame:
 df_all = pd.DataFrame()
 
 # 'Bar'ディレクトリ内の全ファイルをループ
-for file in os.listdir('./Data/Bar/'):
+for file in os.listdir(in_dir):
     # csvファイルを読み込む
-    df = pd.read_csv('./Data/Bar/' + file, index_col=0)
+    df = pd.read_csv(in_dir + file, index_col=0)
     # indexをdatetime形式に変更
     df.index = pd.to_datetime(df.index)
 

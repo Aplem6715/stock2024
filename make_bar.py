@@ -4,7 +4,10 @@ import pandas as pd
 import pickle
 import os
 
+in_dir = './Data/Split/'
 out_dir = './Data/Bar/'
+# in_dir = './DataTest/Split/'
+# out_dir = './DataTest/Bar/'
 bar_thresh = 30000
 
 
@@ -41,12 +44,12 @@ shutil.rmtree(out_dir, ignore_errors=True)
 os.makedirs(out_dir, exist_ok=True)
 
 # Data/Split/ディレクトリ内の全ディレクトリをループ
-for dir in os.listdir('./Data/Split/'):
-    code_dir = './Data/Split/' + dir + '/'
+for dir in os.listdir(in_dir):
+    code_dir = in_dir + dir + '/'
     df_all = pd.DataFrame()
 
     # Data/Split/ディレクトリ内の全ファイルをループして1つのdfにマージする
-    for file in os.listdir('./Data/Split/' + dir):
+    for file in os.listdir(in_dir + dir):
         df = pd.read_parquet(code_dir + file)
         # trading volume列をvolume列に変更
         df = df.rename(columns={'trading volume': 'Volume'})

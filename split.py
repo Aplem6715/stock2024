@@ -3,13 +3,17 @@ import os
 import pickle
 import shutil
 
+# filtered_dir = './DataTest/Filtered/'
+# out_dir = './DataTest/Split/'
+# codes_out_file = './DataTest/split_codes.csv'
 filtered_dir = './Data/Filtered/'
 out_dir = './Data/Split/'
+codes_out_file = './Data/split_codes.csv'
 
 is_first = True
 next_codes = []
 
-shutil.rmtree(out_dir)
+shutil.rmtree(out_dir, ignore_errors=True)
 
 # Data/Filtered/ディレクトリ内の全ファイルをループ
 for file in os.listdir(filtered_dir):
@@ -20,7 +24,7 @@ for file in os.listdir(filtered_dir):
 
     ok_count = 0
     for code in codes:
-        dir = 'Data/Split/' + str(code)
+        dir = out_dir + str(code)
         split_df = df[df['issue code'] == code]
         # issue code列を削除
         split_df = split_df.drop(columns='issue code')
@@ -49,4 +53,4 @@ for file in os.listdir(filtered_dir):
         f'\033[32mOK\033[0m: {ok_count} / \033[31mNG\033[0m: {len(codes) - ok_count}')
 
 # codesをcsvで保存
-pd.Series(codes).to_csv('Data/split_codes.csv', index=False, header=False)
+pd.Series(codes).to_csv(codes_out_file, index=False, header=False)
