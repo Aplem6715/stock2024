@@ -2,8 +2,8 @@ import os
 import numpy as np
 import pandas as pd
 import finplot as fplt
-from feature import add_multi_time_indicators
-from utilc.zigzag import calc_zigzag
+from .feature import add_multi_time_indicators
+from .utilc.zigzag import calc_zigzag
 
 time_frames = ['1T', '1H']
 zig_period = 10

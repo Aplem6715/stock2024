@@ -1,7 +1,7 @@
 from typing import List
 import pandas as pd
 import numpy as np
-from util import conv_chart
+from scripts.features.util import conv_chart
 
 from ta.momentum import RSIIndicator, StochasticOscillator, ROCIndicator, WilliamsRIndicator
 from ta.trend import SMAIndicator, EMAIndicator, MACD, IchimokuIndicator
@@ -28,7 +28,7 @@ def conv_chart(df: pd.DataFrame, bar_freq: str) -> pd.DataFrame:
                                            'Volume': 'sum'})
     return ret
 
-def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str], check_empty: bool = True) -> pd.DataFrame:
+def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str], check_empty: bool = True, debug_print=False) -> pd.DataFrame:
     is_first_freq = True
     for freq in freqs:
         df = conv_chart(origin, freq) if freq != '1T' else origin.copy()
@@ -38,14 +38,14 @@ def add_multi_time_indicators(origin: pd.DataFrame, freqs: List[str], check_empt
         if is_first_freq:
             ret = df
         else:
-            df.drop(columns=['Open', 'High', 'Low', 'Close', 'Volume'])
             df = df.add_suffix(f'_{freq}')
             ret = ret.join(df)
         is_first_freq = False
     ret = ret.fillna(method='ffill')
 
-    print(np.isnan(ret.values).sum(axis=0))
-    print(ret.shape)
+    if debug_print:
+        print(np.isnan(ret.values).sum(axis=0))
+        print(ret.shape)
 
     ret = ret.dropna()
 
