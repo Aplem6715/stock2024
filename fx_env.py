@@ -58,11 +58,10 @@ class TradeEnv(gym.Env):
 
     render_data_length = 48
 
-    def __init__(self, df: pd.DataFrame, duration, position_size=1000, render_mode=None, scaler=None):
+    def __init__(self, df_list: list[pd.DataFrame], duration, position_size=1000, render_mode=None, scaler=None):
 
         self.render_mode = render_mode
-        if self.render_mode == 'human':
-            self.ohlc = df.iloc[:, :5].copy()
+        self.df_list = df_list
 
         self.is_long_act_env = (self.ACTION_SIGN[1] == 1)
         self.index = 0
@@ -70,23 +69,17 @@ class TradeEnv(gym.Env):
         self.position = 0
         self.position_size = position_size
 
-        self.closes = df['Close'].values
-        self.obs_arr = df.iloc[:, 5:].values
-        # self.obs_arr = np.insert(self.obs_arr, -1, 0, axis=1)
+        all_df = pd.concat(self.df_list)
 
-        diffs = df['Close'].diff()
+        diffs = all_df['Close'].diff()
         std = diffs.std()
         self.std_diff2 = std * 2
         self.commission_reward = std * self.COMMISSION_PCT
 
-        print(f'obs data: {self.obs_arr.shape}')
-
         if scaler is None:
-            self.close_std = StandardScaler()
-            self.obs_arr = self.close_std.fit_transform(self.obs_arr)
+            self.close_std = self.make_scaler()
         else:
             self.close_std: StandardScaler = scaler
-            self.obs_arr = self.close_std.transform(self.obs_arr)
 
         if duration:
             self.duration = duration
@@ -96,7 +89,7 @@ class TradeEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(len(self.ACTION_SIGN))
         self.observation_space = gym.spaces.Box(
             low=-1, high=1,
-            shape=(self.obs_arr.shape[1],))
+            shape=(len(df_list[0].columns)-5,))
         # shape=(df.shape[1] - 5 + 1,))  # OHLCVデータ分-5
         self.reward_range = (-1.0, 1.0)
         self.is_first_render = True
@@ -104,19 +97,26 @@ class TradeEnv(gym.Env):
         self.rewards = []
         random.seed(42)
 
+    def make_scaler(self, all_df):
+        all_obs = all_df.iloc[:, 5:].values
+        self.close_std = StandardScaler()
+        self.close_std.fit(all_obs)
+        return self.close_std
+
     def reset(self, seed=None):
         if seed is not None:
             random.seed(seed)
 
-        if self.duration < len(self.closes):
-            # ランダムな初期ディレイを与える
-            self.index = random.randint(
-                max(self.OBSERVE_LEN, self.FEATURE_CALC_DELAY),
-                len(self.closes) - self.duration)
-            self.end_idx = self.index + self.duration - self.FEATURE_CALC_DELAY
-        else:
-            self.index = max(self.OBSERVE_LEN, self.FEATURE_CALC_DELAY)
-            self.end_idx = len(self.closes) - self.FEATURE_CALC_DELAY
+        data_index = random.randint(len(self.df_list))
+        df = self.data_list[data_index]
+
+        self.closes = df['Close'].values
+
+        self.obs_arr = df.iloc[:, 5:].values
+        self.obs_arr = self.close_std.transform(self.obs_arr)
+
+        if self.render_mode == 'human':
+            self.ohlc = df.iloc[:, :5].copy()
 
         self.balance = self.INIT_BALANCE
         self.position = 0
