@@ -82,9 +82,9 @@ class TradeEnv(gym.Env):
             self.close_std: StandardScaler = scaler
 
         if duration:
-            self.duration = duration
+            self.max_duration = duration
         else:
-            self.duration = len(df)
+            self.max_duration = None
 
         self.action_space = gym.spaces.Discrete(len(self.ACTION_SIGN))
         self.observation_space = gym.spaces.Box(
@@ -110,6 +110,7 @@ class TradeEnv(gym.Env):
         data_index = random.randint(len(self.df_list))
         df = self.data_list[data_index]
 
+        self.duration = min(len(df), self.max_duration)
         self.closes = df['Close'].values
 
         self.obs_arr = df.iloc[:, 5:].values
